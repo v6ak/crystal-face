@@ -86,13 +86,6 @@ class Indicators extends Ui.Drawable {
 	}
 
 	function drawIndicator(dc, indicatorType, x, y) {
-
-		// Battery indicator.
-		if (indicatorType == 4 /* INDICATOR_TYPE_BATTERY */) {
-			drawBatteryMeter(dc, x, y, mBatteryWidth, mBatteryWidth / 2);
-			return;
-		}
-
 		// Show notifications icon if connected and there are notifications, bluetoothicon otherwise.
 		var settings = Sys.getDeviceSettings();
 		if (indicatorType == 3 /* INDICATOR_TYPE_BLUETOOTH_OR_NOTIFICATIONS */) {
@@ -103,21 +96,33 @@ class Indicators extends Ui.Drawable {
 			}
 		}
 
-		// Get value for indicator type.
-		var value = [
-			/* INDICATOR_TYPE_BLUETOOTH */ settings.phoneConnected,
-			/* INDICATOR_TYPE_ALARMS */ settings.alarmCount > 0,
-			/* INDICATOR_TYPE_NOTIFICATIONS */ settings.notificationCount > 0
-		][indicatorType];
+		switch(indicatorType){
+			case 0:/* INDICATOR_TYPE_BLUETOOTH */
+				drawTextIndicator(dc, x, y, settings.phoneConnected, "8");
+				break;
+			case 1: /* INDICATOR_TYPE_ALARMS */
+				drawTextIndicator(dc, x, y, settings.alarmCount > 0, ":");
+				break;
+			case 2: /* INDICATOR_TYPE_NOTIFICATIONS */
+				drawTextIndicator(dc, x, y, settings.notificationCount > 0, "5");
+				break;
+			// 3 is switched to 2 or 0
+			case 4: /* INDICATOR_TYPE_BATTERY */
+				drawBatteryMeter(dc, x, y, mBatteryWidth, mBatteryWidth / 2);
+				break;
+			case 5: // INDICATOR_TYPE_NIGHT_MODE
+				drawTextIndicator(dc, x, y, settings.doNotDisturb, "B");
+				break;
+		}
+	}
 
+	function drawTextIndicator(dc, x, y, value, iconText) {
 		dc.setColor(value ? gThemeColour : gMeterBackgroundColour, Graphics.COLOR_TRANSPARENT);
-
-		// Icon.
 		dc.drawText(
 			x,
 			y,
 			gIconsFont,
-			["8", ":", "5"][indicatorType], // Get icon font char for indicator type.
+			iconText,
 			Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
 		);
 	}
