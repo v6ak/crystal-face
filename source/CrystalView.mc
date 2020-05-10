@@ -81,6 +81,7 @@ class CrystalView extends Ui.WatchFace {
 	private var mIsBurnInProtection = false; // Is burn-in protection required and active?
 	private var mBurnInProtectionChangedSinceLastDraw = false; // Did burn-in protection change since last full update?
 	private var mSettingsChangedSinceLastDraw = true; // Have settings changed since last full update?
+	private var mLastReducedState = false; // The initial value does not matter…
 
 	private var mTime;
 	var mDataFields;
@@ -183,13 +184,32 @@ class CrystalView extends Ui.WatchFace {
 		var city = App.getApp().getProperty("LocalTimeInCity");
 
 		// #78 Setting with value of empty string may cause corresponding property to be null.
-		gNormalFont = Ui.loadResource(((city != null) && (city.length() > 0)) ?
-			Rez.Fonts.NormalFontCities : Rez.Fonts.NormalFont);
+		var font = 		((city != null) && (city.length() > 0)) ?
+			Rez.Fonts.NormalFontCities : Rez.Fonts.NormalFont;
+		Sys.println(font);
+		gNormalFont = Ui.loadResource(font);
+	}
+	
+	function isReduced(){
+		var settings = Sys.getDeviceSettings();
+		return !settings.phoneConnected || settings.doNotDisturb;
+	}
+	
+	function checkReduced(){
+		var currentReducedState = isReduced();
+		if(mLastReducedState != currentReducedState){
+			updateThemeColours();
+			updateHoursMinutesColours();
+			mLastReducedState = currentReducedState;
+			mSettingsChangedSinceLastDraw = true;
+		}
 	}
 
 	function updateThemeColours() {
 		var theme = App.getApp().getProperty("Theme");
-
+		if(isReduced()){
+			theme = App.getApp().getProperty("ReducedTheme");
+		}
 		// Theme-specific colours.
 		gThemeColour = [
 			Graphics.COLOR_BLUE,     // THEME_BLUE_DARK
@@ -282,6 +302,7 @@ class CrystalView extends Ui.WatchFace {
 
 	// Update the view
 	function onUpdate(dc) {
+		checkReduced();
 		//Sys.println("onUpdate()");
 
 		// If burn-in protection has changed, set layout appropriate to new burn-in protection state.

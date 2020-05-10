@@ -4,6 +4,7 @@
 	<string id="AppVersionTitle">App Version</string>
 
 	<string id="ThemeTitle">Theme</string>
+	<string id="ReducedThemeTitle">Reduced theme</string>
 	<string id="HoursColourTitle">Hours Colour</string>
 	<string id="MinutesColourTitle">Minutes Colour</string>
 	<string id="LeftGoalMeterTitle">Left Meter</string>
