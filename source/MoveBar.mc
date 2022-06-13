@@ -3,6 +3,11 @@ using Toybox.System as Sys;
 using Toybox.Application as App;
 using Toybox.ActivityMonitor as ActivityMonitor;
 using Toybox.Graphics;
+using Toybox.Time.Gregorian;
+using Toybox.Time;
+using Toybox.Math;
+using Toybox.Position;
+
 
 class MoveBar extends Ui.Drawable {
 
@@ -28,6 +33,16 @@ class MoveBar extends Ui.Drawable {
 	// 	HIDDEN
 	// };
 
+	private var mPosition;
+
+	function format2d(num, fill) {
+		if (num < 10) {
+			return fill + num;
+		} else {
+			return num.toString();
+		}
+	}
+
 	function initialize(params) {
 		Drawable.initialize(params);
 		
@@ -52,7 +67,24 @@ class MoveBar extends Ui.Drawable {
 	}
 	
 	function draw(dc) {
-		if (App.getApp().getProperty("MoveBarStyle") == 2 /* HIDDEN */) {
+		if (true || App.getApp().getProperty("MoveBarStyle") == 2 /* HIDDEN */) {
+			var hoursFont = Ui.loadResource(Rez.Fonts.NormalFont);
+			var utcNow = Toybox.Time.now();
+			// TODO: use nextSunRise
+			var sunRise = Toybox.Weather.getSunrise(mPosition, utcNow);
+
+			var now = utcNow.subtract(sunRise);
+			var hours = now.value() / 3600;
+			var minutes = (now.value() % 3600) / 60;
+			var formattedTime = format2d(hours, " ") + ":" + format2d(minutes, "0");
+			dc.drawText(
+				mX,
+				mY,
+				hoursFont,
+				"                    " + formattedTime,
+				Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER
+			);
+
 			return;
 		}
 
